@@ -20,8 +20,8 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    # 3️⃣ Cache das dependências do Poetry
-    - name: Cache Poetry dependencies
+    # 3️⃣ Cache das dependências do Poetry e pip
+    - name: Cache dependencies
       uses: actions/cache@v3
       with:
         path: |
@@ -31,14 +31,14 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-poetry-${{ matrix.poetry-version }}-
 
-    # 4️⃣ Instalar Poetry
+    # 4️⃣ Instalar Poetry via pip (mais confiável)
     - name: Install Poetry ${{ matrix.poetry-version }}
       run: |
-        curl -sSL https://install.python-poetry.org | POETRY_VERSION=${{ matrix.poetry-version }} python -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        python -m pip install --upgrade pip
+        pip install "poetry==${{ matrix.poetry-version }}"
         poetry --version
 
-    # 5️⃣ Instalar dependências
+    # 5️⃣ Instalar dependências do projeto
     - name: Install dependencies
       run: poetry install --no-interaction --no-ansi
 
