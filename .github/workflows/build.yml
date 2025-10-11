@@ -1,33 +1,47 @@
 name: Python application
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         python-version: [3.8, 3.9]
         poetry-version: [1.1.4, 1.2.0]
 
-    runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
+    # 1️⃣ Checkout do código
+    - uses: actions/checkout@v3
 
+    # 2️⃣ Configurar Python
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
+    # 3️⃣ Cache das dependências do Poetry
+    - name: Cache Poetry dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/pypoetry
+          ~/.cache/pip
+        key: ${{ runner.os }}-poetry-${{ matrix.poetry-version }}-python-${{ matrix.python-version }}
+        restore-keys: |
+          ${{ runner.os }}-poetry-${{ matrix.poetry-version }}-
+
+    # 4️⃣ Instalar Poetry
     - name: Install Poetry ${{ matrix.poetry-version }}
       run: |
         curl -sSL https://install.python-poetry.org | POETRY_VERSION=${{ matrix.poetry-version }} python -
-        export PATH="$HOME/.local/bin:$PATH"
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
         poetry --version
 
+    # 5️⃣ Instalar dependências
     - name: Install dependencies
-      run: poetry install
+      run: poetry install --no-interaction --no-ansi
 
-    - name: Test
-      run: |
-        poetry run python manage.py test
+    # 6️⃣ Rodar testes do Django
+    - name: Run tests
+      run: poetry run python manage.py test
