@@ -37,7 +37,7 @@ WORKDIR $PYSETUP_PATH
 COPY pyproject.toml poetry.lock* ./
 
 # Instalar dependências
-RUN poetry install --no-root
+RUN poetry install --no-root --with dev
 
 # Configurar diretório da aplicação
 WORKDIR /app

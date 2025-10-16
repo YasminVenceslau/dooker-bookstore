@@ -1,39 +1,31 @@
-version: '3.9'
+version: "3.9"
 
-# Define os serviços (containers) que serão executados
 services:
-  # Serviço da aplicação Django
+  # 🖥️ Serviço da aplicação Django
   web:
-    # Indica que será construída uma imagem a partir do Dockerfile no diretório atual
     build: .
-    # Comando que será executado quando o container iniciar
     command: python manage.py runserver 0.0.0.0:8000
-    # Mapeia o diretório local atual para o diretório /app dentro do container
     volumes:
-      - .:/app
-    # Mapeia a porta 8000 do host para a 8000 do container
+      - .:/app  # sincroniza código local com container
     ports:
       - "8000:8000"
-    # Carrega variáveis de ambiente do arquivo env.dev
     env_file:
-      - ./env.dev
-    # Define que o container "web" depende do banco de dados
+      - ./env.dev  # carrega variáveis de ambiente
     depends_on:
       - db
 
-  # Serviço do banco de dados PostgreSQL
+  # 🗄️ Banco de dados PostgreSQL
   db:
-    # Usa a imagem leve do Postgres baseada em Alpine Linux
     image: postgres:15-alpine
-    # Persiste os dados do banco de dados no volume nomeado postgres_data
+    environment:
+      POSTGRES_USER: bookstore_dev
+      POSTGRES_PASSWORD: bookstore_dev
+      POSTGRES_DB: bookstore_dev_db
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    # Define variáveis de ambiente do banco de dados
-    environment:
-      - POSTGRES_USER=dev
-      - POSTGRES_PASSWORD=dev
-      - POSTGRES_DB=bookstore_db
+    ports:
+      - "5432:5432"
 
-# Define volumes nomeados que podem ser compartilhados entre containers
 volumes:
   postgres_data:
+  app_data:
